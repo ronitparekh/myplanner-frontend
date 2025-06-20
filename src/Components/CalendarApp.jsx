@@ -290,13 +290,12 @@ const CalendarApp = () => {
               placeholder="Event description (max 60 chars)"
               maxLength={60}
             ></textarea>
-            <button className="popup-button add" onClick={handleEventSubmit}>
+            <button onClick={handleEventSubmit}>
               {editingEvent ? "Update" : "Add"} Event
             </button>
-            <button className="popup-button cancel" onClick={() => setShowEventPopup(false)}>
+            <button onClick={() => setShowEventPopup(false)}>
               Cancel
             </button>
-
           </div>
         )}
 
