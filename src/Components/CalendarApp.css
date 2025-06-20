@@ -27,8 +27,10 @@
 
 .calendar {
   width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures spacing between calendar and button */
   position: relative;
-  /* Add this */
 }
 
 .heading {
@@ -331,11 +333,6 @@
 
 .add-event-btn {
   margin-top: 2rem;
-  margin-left: 1.3rem;
-  position: absolute;
-  /* Change from margin */
-  bottom: 2rem;
-  left: 1.3rem;
   padding: 1rem 2rem;
   background-color: #ef9011;
   color: white;
@@ -345,7 +342,7 @@
   border-radius: 1rem;
   cursor: pointer;
   box-shadow: 0 0 1.5rem rgba(239, 144, 17, 0.3);
-
+  align-self: flex-start;
 }
 
 .add-event-btn:hover {
@@ -365,20 +362,14 @@
 
 /* Month/Year Dropdown */
 .dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 4px;
-  background-color: #2c2f4a;
-  border: 1px solid #444;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  overflow-y: auto;
-  max-height: 220px;
-  width: max-content;
-  min-width: 100px;
+  background-color: #2d334a; /* More contrast */
+  border-radius: 0.8rem;
+  border: 1px solid #555;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  width: 160px; /* wider */
   padding: 6px 0;
+  z-index: 20;
+}
 
   /* Hide scrollbar */
   scrollbar-width: none;
@@ -391,16 +382,18 @@
 
 
 .dropdown-item {
-  padding: 10px 16px;
+  padding: 10px 20px;
   cursor: pointer;
   transition: background 0.2s ease;
-  font-size: 14px;
+  font-size: 1.4rem;
   color: #ffffff;
-  white-space: nowrap;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05rem;
 }
 
+
 .dropdown-item:hover {
-  background-color: #444a6a;
+  background-color: #3c4765;
 }
 
 /* Placeholder when no tasks */
@@ -426,6 +419,15 @@
   flex-direction: column;
   align-items: flex-start;
   margin-right: 1rem;
+}
+.dropdown-container h2 {
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.6rem;
+  transition: background 0.2s ease;
+}
+
+.dropdown-container h2:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .dropdown-container.year-dropdown .dropdown {
