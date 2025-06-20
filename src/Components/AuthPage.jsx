@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../api/api";
 import "./AuthPage.css";
 
 const AuthPage = () => {
@@ -22,10 +22,10 @@ const AuthPage = () => {
       return alert("Passwords do not match");
     }
 
-    const endpoint = isSignUp ? "/api/auth/signup" : "/api/auth/signin";
+    const endpoint = isSignUp ? "/auth/signup" : "/auth/signin";
 
     try {
-      const { data } = await axios.post("http://localhost:5000" + endpoint, {
+      const { data } = await API.post( endpoint, {
         name: formData.name,
         email: formData.email,
         password: formData.password,

@@ -12,11 +12,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis
+  PolarAngleAxis
 } from "recharts";
-import axios from "axios";
+import API from "../api/api"; // 🔁 Replace with actual relative path to your `api.js`
 import "./ProgressPage.css";
 
 const ProgressPage = () => {
@@ -27,15 +25,11 @@ const ProgressPage = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      const token = localStorage.getItem("token");
       try {
-        const res = await axios.get("http://localhost:5000/api/events", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const res = await API.get("/events");
         const events = res.data;
         const today = new Date();
-        
+
         // Daily data
         const todayEvents = events.filter(e => new Date(e.date).toDateString() === today.toDateString());
         setDailyData({
@@ -45,29 +39,29 @@ const ProgressPage = () => {
 
         // Weekly data (Sunday to Saturday)
         const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - today.getDay()); // Go to Sunday
+        weekStart.setDate(today.getDate() - today.getDay());
         const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // Go to Saturday
-        
+        weekEnd.setDate(weekStart.getDate() + 6);
+
         const weeklyEvents = events.filter(e => {
           const eventDate = new Date(e.date);
           return eventDate >= weekStart && eventDate <= weekEnd;
         });
-        
+
         setWeeklyData({
           completed: weeklyEvents.filter(e => e.done).length,
           total: weeklyEvents.length
         });
 
-        // Generate weekly trend data (Sunday to Saturday)
+        // Weekly trend (Sunday to Saturday)
         const trendData = Array.from({ length: 7 }, (_, i) => {
           const date = new Date(weekStart);
           date.setDate(weekStart.getDate() + i);
-          
-          const dayEvents = events.filter(e => 
+
+          const dayEvents = events.filter(e =>
             new Date(e.date).toDateString() === date.toDateString()
           );
-          
+
           return {
             name: date.toLocaleDateString('en-US', { weekday: 'short' }),
             date: date.toDateString(),
@@ -79,7 +73,7 @@ const ProgressPage = () => {
         setWeeklyTrend(trendData);
 
         // Monthly data
-        const monthEvents = events.filter(e => 
+        const monthEvents = events.filter(e =>
           new Date(e.date).getMonth() === today.getMonth()
         );
         setMonthlyData({
@@ -95,7 +89,6 @@ const ProgressPage = () => {
     fetchEvents();
   }, []);
 
-  // Radial chart data for daily progress
   const dailyRadialData = [
     {
       name: 'Daily Progress',
@@ -107,9 +100,9 @@ const ProgressPage = () => {
   return (
     <div className="progress-page">
       <h1>Your Productivity Dashboard</h1>
-      
+
       <div className="charts-container">
-        {/* Daily Progress - Radial Bar Chart */}
+        {/* Daily Progress */}
         <div className="chart-card daily-card">
           <h3>Today's Progress</h3>
           <div className="daily-progress-container">
@@ -122,10 +115,10 @@ const ProgressPage = () => {
                   startAngle={180}
                   endAngle={-180}
                 >
-                  <PolarAngleAxis 
-                    type="number" 
-                    domain={[0, 100]} 
-                    angleAxisId={0} 
+                  <PolarAngleAxis
+                    type="number"
+                    domain={[0, 100]}
+                    angleAxisId={0}
                     tick={false}
                   />
                   <RadialBar
@@ -157,19 +150,16 @@ const ProgressPage = () => {
           </div>
         </div>
 
-        {/* Weekly Progress - Area Chart */}
+        {/* Weekly Progress */}
         <div className="chart-card">
           <h3>Weekly Trend</h3>
           <div className="chart-wrapper">
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={weeklyTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#4a5568" />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#e2e8f0" 
-                />
+                <XAxis dataKey="name" stroke="#e2e8f0" />
                 <YAxis stroke="#e2e8f0" />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: '#2d3748',
                     borderColor: '#4a5568',
@@ -177,16 +167,12 @@ const ProgressPage = () => {
                     color: 'white'
                   }}
                   formatter={(value, name) => [
-                    value, 
+                    value,
                     name === 'completed' ? 'Completed' : 'Total Tasks'
                   ]}
                   labelFormatter={(label) => `Day: ${label}`}
                 />
-                <Legend 
-                  formatter={(value) => (
-                    value === 'completed' ? 'Completed' : 'Total Tasks'
-                  )}
-                />
+                <Legend formatter={(value) => value === 'completed' ? 'Completed' : 'Total Tasks'} />
                 <Area
                   type="monotone"
                   dataKey="total"
@@ -211,7 +197,7 @@ const ProgressPage = () => {
           </div>
         </div>
 
-        {/* Monthly Progress - Bar Chart */}
+        {/* Monthly Progress */}
         <div className="chart-card">
           <h3>Monthly Overview</h3>
           <div className="chart-wrapper">
@@ -223,7 +209,7 @@ const ProgressPage = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#4a5568" />
                 <XAxis dataKey="name" stroke="#e2e8f0" />
                 <YAxis stroke="#e2e8f0" />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: '#2d3748',
                     borderColor: '#4a5568',
@@ -232,14 +218,8 @@ const ProgressPage = () => {
                   }}
                   formatter={(value) => [value, 'tasks']}
                 />
-                <Bar
-                  dataKey="value"
-                  name="Tasks"
-                  barSize={60}
-                  radius={[4, 4, 0, 0]}
-                >
-                  <Bar dataKey="value" fill="#8884d8" name="Completed" />
-                  <Bar dataKey="value" fill="#4a5568" name="Remaining" />
+                <Bar dataKey="value" barSize={60} radius={[4, 4, 0, 0]}>
+                  {/* These nested Bars are unnecessary, simplified */}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
