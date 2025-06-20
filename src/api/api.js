@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://myplanner-backend.onrender.com/api",
 });
 
 // Add JWT to every request if exists
