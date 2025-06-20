@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import API from "../api/api"; // 🔁 Replace with actual path to your api.js
+import API from "../path/to/api"; // 🔁 Replace with actual relative path
 import "./CalendarApp.css";
 
 const CalendarApp = () => {
-  const daysofweek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const monthsofyear = [
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
@@ -12,8 +12,8 @@ const CalendarApp = () => {
   const currentDate = new Date();
   const [currentMonth, setCurrentMonth] = useState(currentDate.getMonth());
   const [currentYear, setCurrentYear] = useState(currentDate.getFullYear());
-  const [selectedDate, setselectedDate] = useState(currentDate);
-  const [showEventPopup, setshowEventPopup] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(currentDate);
+  const [showEventPopup, setShowEventPopup] = useState(false);
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [events, setEvents] = useState([]);
@@ -33,28 +33,21 @@ const CalendarApp = () => {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        monthDropdownRef.current &&
-        !monthDropdownRef.current.contains(e.target)
-      ) {
-        setShowMonthDropdown(false);
-      }
+        monthDropdownRef.current && !monthDropdownRef.current.contains(e.target)
+      ) setShowMonthDropdown(false);
       if (
-        yearDropdownRef.current &&
-        !yearDropdownRef.current.contains(e.target)
-      ) {
-        setShowYearDropdown(false);
-      }
+        yearDropdownRef.current && !yearDropdownRef.current.contains(e.target)
+      ) setShowYearDropdown(false);
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const isSameDay = (date1, date2) => {
+  const isSameDay = (d1, d2) => {
     return (
-      new Date(date1).getFullYear() === date2.getFullYear() &&
-      new Date(date1).getMonth() === date2.getMonth() &&
-      new Date(date1).getDate() === date2.getDate()
+      new Date(d1).getFullYear() === d2.getFullYear() &&
+      new Date(d1).getMonth() === d2.getMonth() &&
+      new Date(d1).getDate() === d2.getDate()
     );
   };
 
@@ -65,7 +58,7 @@ const CalendarApp = () => {
   };
 
   const handleDayClick = (day) => {
-    setselectedDate(new Date(currentYear, currentMonth, day));
+    setSelectedDate(new Date(currentYear, currentMonth, day));
   };
 
   const prevMonth = () => {
@@ -80,15 +73,15 @@ const CalendarApp = () => {
 
   const handleEventSubmit = async () => {
     const formattedTime = `${eventTime.hours.padStart(2, "0")}:${eventTime.minutes.padStart(2, "0")}`;
-    
-    const hasConflict = events.some((event) => 
+
+    const hasConflict = events.some((event) =>
       isSameDay(event.date, selectedDate) &&
       event.time === formattedTime &&
       (!editingEvent || event._id !== editingEvent._id)
     );
 
     if (hasConflict) {
-      alert("An event is already scheduled at this time. Please choose a different time.");
+      alert("An event already exists at this time.");
       return;
     }
 
@@ -108,37 +101,35 @@ const CalendarApp = () => {
       }
 
       const updatedEvents = editingEvent
-        ? events.map((event) => (event._id === res.data._id ? res.data : event))
+        ? events.map((e) => (e._id === res.data._id ? res.data : e))
         : [...events, res.data];
 
       updatedEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
       setEvents(updatedEvents);
       setEventTime({ hours: "00", minutes: "00" });
       setEventText("");
-      setshowEventPopup(false);
+      setShowEventPopup(false);
       setEditingEvent(null);
     } catch (err) {
       console.error("Event submit error:", err);
-      alert("Something went wrong while saving the event.");
+      alert("Failed to save event.");
     }
   };
 
   const handleEditEvent = (event) => {
     if (isPastDate(event.date)) return;
-    setselectedDate(new Date(event.date));
-    setEventTime({
-      hours: event.time.split(":")[0],
-      minutes: event.time.split(":")[1],
-    });
+    setSelectedDate(new Date(event.date));
+    const [h, m] = event.time.split(":");
+    setEventTime({ hours: h, minutes: m });
     setEventText(event.text);
     setEditingEvent(event);
-    setshowEventPopup(true);
+    setShowEventPopup(true);
   };
 
   const handleDeleteEvent = async (eventId) => {
     try {
       await API.delete(`/events/${eventId}`);
-      setEvents(events.filter((event) => event._id !== eventId));
+      setEvents(events.filter((e) => e._id !== eventId));
     } catch (err) {
       console.error("Delete failed:", err);
     }
@@ -153,24 +144,25 @@ const CalendarApp = () => {
         ...target,
         done: !target.done,
       });
-      setEvents(events.map((event) => (event._id === eventId ? res.data : event)));
+      setEvents(events.map((e) => (e._id === eventId ? res.data : e)));
     } catch (err) {
-      console.error("Toggle done failed:", err);
+      console.error("Toggle failed:", err);
     }
   };
 
   const handleTimeChange = (e) => {
     const { name, value } = e.target;
-    setEventTime((prevTime) => ({
-      ...prevTime,
+    setEventTime((prev) => ({
+      ...prev,
       [name]: value.padStart(2, "0"),
     }));
   };
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayofMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+
   const filteredEvents = events
-    .filter((event) => isSameDay(event.date, selectedDate))
+    .filter((e) => isSameDay(e.date, selectedDate))
     .sort((a, b) => {
       const [h1, m1] = a.time.split(":").map(Number);
       const [h2, m2] = b.time.split(":").map(Number);
@@ -179,8 +171,156 @@ const CalendarApp = () => {
 
   return (
     <div className="calendar-app">
-      {/* Remainder of JSX rendering (same as before) */}
-      {/* ... */}
+      <div className="calendar">
+        <h1 className="heading">Calendar</h1>
+        <div className="navigate-date">
+          <div className="dropdown-container">
+            <h2 onClick={() => {
+              setShowMonthDropdown(!showMonthDropdown);
+              setShowYearDropdown(false);
+            }}>
+              {months[currentMonth]}
+            </h2>
+            {showMonthDropdown && (
+              <div className="dropdown" ref={monthDropdownRef}>
+                {months.map((m, i) => (
+                  <div key={i} onClick={() => {
+                    setCurrentMonth(i);
+                    setShowMonthDropdown(false);
+                  }}>{m}</div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="dropdown-container">
+            <h2 onClick={() => {
+              setShowYearDropdown(!showYearDropdown);
+              setShowMonthDropdown(false);
+            }}>
+              {currentYear}
+            </h2>
+            {showYearDropdown && (
+              <div className="dropdown" ref={yearDropdownRef}>
+                {[...Array(101)].map((_, i) => {
+                  const year = currentDate.getFullYear() - 50 + i;
+                  return (
+                    <div key={year} onClick={() => {
+                      setCurrentYear(year);
+                      setShowYearDropdown(false);
+                    }}>{year}</div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <div className="buttons">
+            <i className="bx bx-chevron-left" onClick={prevMonth}></i>
+            <i className="bx bx-chevron-right" onClick={nextMonth}></i>
+          </div>
+        </div>
+
+        <div className="weekdays">
+          {daysOfWeek.map((day) => (
+            <span key={day}>{day}</span>
+          ))}
+        </div>
+
+        <div className="days">
+          {[...Array(firstDay).keys()].map((_, i) => <span key={`e-${i}`} />)}
+          {[...Array(daysInMonth).keys()].map((d) => {
+            const date = new Date(currentYear, currentMonth, d + 1);
+            const isCurrent = isSameDay(date, currentDate);
+            const isSelected = isSameDay(date, selectedDate);
+            const hasEvent = events.some((e) => isSameDay(e.date, date));
+
+            return (
+              <span
+                key={d + 1}
+                className={`day ${isCurrent ? "current-day" : ""} ${isSelected ? "selected-day" : ""} ${hasEvent ? "has-event" : ""}`}
+                onClick={() => handleDayClick(d + 1)}
+              >
+                {d + 1}
+              </span>
+            );
+          })}
+        </div>
+
+        <button
+          className="add-event-btn"
+          onClick={() => !isPastDate(selectedDate) && setShowEventPopup(true)}
+          disabled={isPastDate(selectedDate)}
+          style={{
+            opacity: isPastDate(selectedDate) ? 0.5 : 1,
+            cursor: isPastDate(selectedDate) ? "not-allowed" : "pointer",
+          }}
+        >
+          + Add Event
+        </button>
+      </div>
+
+      <div className="events">
+        {showEventPopup && (
+          <div className="event-popup">
+            <div className="time-input">
+              <label>Time</label>
+              <input
+                type="number"
+                name="hours"
+                min="0"
+                max="23"
+                value={eventTime.hours}
+                onChange={handleTimeChange}
+              />
+              <input
+                type="number"
+                name="minutes"
+                min="0"
+                max="59"
+                value={eventTime.minutes}
+                onChange={handleTimeChange}
+              />
+            </div>
+            <textarea
+              value={eventText}
+              onChange={(e) => {
+                if (!isPastDate(selectedDate) && e.target.value.length <= 60) {
+                  setEventText(e.target.value);
+                }
+              }}
+              placeholder="Event description (max 60 chars)"
+              maxLength={60}
+            ></textarea>
+            <button onClick={handleEventSubmit}>
+              {editingEvent ? "Update" : "Add"} Event
+            </button>
+            <button onClick={() => setShowEventPopup(false)}>
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {filteredEvents.length === 0 ? (
+          <div className="no-events-placeholder">
+            <p>No events for this day.</p>
+            <p>Click "+ Add Event" to schedule one.</p>
+          </div>
+        ) : (
+          filteredEvents.map((e, i) => (
+            <div key={i} className={`event ${e.done ? "done" : ""}`}>
+              <div className="event-time">{e.time}</div>
+              <div className="event-text" onClick={() => toggleEventDone(e._id)}>{e.text}</div>
+              <div className="event-buttons">
+                {!isPastDate(e.date) && (
+                  <>
+                    <i className="bx bxs-edit-alt" onClick={() => handleEditEvent(e)}></i>
+                    <i className="bx bxs-message-alt-x" onClick={() => handleDeleteEvent(e._id)}></i>
+                  </>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };
