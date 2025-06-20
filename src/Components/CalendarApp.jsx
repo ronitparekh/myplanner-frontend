@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import API from "../path/to/api"; // 🔁 Replace with actual relative path
+import API from "../api/api"; // 🔁 Replace with actual relative path
 import "./CalendarApp.css";
 
 const CalendarApp = () => {
