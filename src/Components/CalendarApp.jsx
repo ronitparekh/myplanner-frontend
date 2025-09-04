@@ -226,35 +226,23 @@ const CalendarApp = () => {
         </div>
 
         <div className="days">
-          {(() => {
-            const days = [];
-            // Leading empty days
-            for (let i = 0; i < firstDay; i++) {
-              days.push(<span key={`empty-start-${i}`} className="empty-day" />);
-            }
-            // Actual days
-            for (let d = 1; d <= daysInMonth; d++) {
-              const date = new Date(currentYear, currentMonth, d);
-              const isCurrent = isSameDay(date, currentDate);
-              const isSelected = isSameDay(date, selectedDate);
-              const hasEvent = events.some((e) => isSameDay(e.date, date));
-              days.push(
-                <span
-                  key={d}
-                  className={`day ${isCurrent ? "current-day" : ""} ${isSelected ? "selected-day" : ""} ${hasEvent ? "has-event" : ""}`}
-                  onClick={() => handleDayClick(d)}
-                >
-                  {d}
-                </span>
-              );
-            }
-            // Trailing empty days to always make 6 rows (6*7=42)
-            const totalCells = firstDay + daysInMonth;
-            for (let i = 0; i < 42 - totalCells; i++) {
-              days.push(<span key={`empty-end-${i}`} className="empty-day" />);
-            }
-            return days;
-          })()}
+          {[...Array(firstDay).keys()].map((_, i) => <span key={`e-${i}`} />)}
+          {[...Array(daysInMonth).keys()].map((d) => {
+            const date = new Date(currentYear, currentMonth, d + 1);
+            const isCurrent = isSameDay(date, currentDate);
+            const isSelected = isSameDay(date, selectedDate);
+            const hasEvent = events.some((e) => isSameDay(e.date, date));
+
+            return (
+              <span
+                key={d + 1}
+                className={`day ${isCurrent ? "current-day" : ""} ${isSelected ? "selected-day" : ""} ${hasEvent ? "has-event" : ""}`}
+                onClick={() => handleDayClick(d + 1)}
+              >
+                {d + 1}
+              </span>
+            );
+          })}
         </div>
 
         <button
