@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import "./AuthPage.css";
 
 const AuthPage = () => {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -10,6 +12,11 @@ const AuthPage = () => {
     password: "",
     confirmPassword: "",
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) navigate("/calendar", { replace: true });
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,7 +32,7 @@ const AuthPage = () => {
     const endpoint = isSignUp ? "/auth/signup" : "/auth/signin";
 
     try {
-      const { data } = await API.post( endpoint, {
+      const { data } = await API.post(endpoint, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -35,7 +42,7 @@ const AuthPage = () => {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       alert(data.message || "Authenticated successfully!");
-      window.location.href = "/calendar";
+      navigate("/calendar", { replace: true });
     } catch (err) {
       alert(
         err.response?.data?.message || "Authentication failed. Try again."

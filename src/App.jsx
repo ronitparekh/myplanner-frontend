@@ -1,5 +1,4 @@
-import CalendarApp from "./Components/CalendarApp";
-import './Components/CalendarApp.css';
+import { Outlet } from "react-router-dom";
 import './Components/Sidebar.css';
 import Sidebar from "./Components/Sidebar";
 
@@ -7,9 +6,9 @@ const App = () => {
   return (
     <div className="app-layout">
       <Sidebar />
-      <div className="calendar-container">
-        <CalendarApp />
-      </div>
+      <main className="app-main">
+        <Outlet />
+      </main>
     </div>
   );
 };

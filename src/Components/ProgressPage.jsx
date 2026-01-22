@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   RadialBarChart,
   RadialBar,
@@ -18,6 +19,7 @@ import API from "../api/api"; // 🔁 Replace with actual relative path to your 
 import "./ProgressPage.css";
 
 const ProgressPage = () => {
+  const navigate = useNavigate();
   const [dailyData, setDailyData] = useState({ completed: 0, total: 0 });
   const [weeklyData, setWeeklyData] = useState({ completed: 0, total: 0 });
   const [monthlyData, setMonthlyData] = useState({ completed: 0, total: 0 });
@@ -83,11 +85,16 @@ const ProgressPage = () => {
 
       } catch (err) {
         console.error("Failed to fetch progress data", err);
+        if (err?.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/", { replace: true });
+        }
       }
     };
 
     fetchEvents();
-  }, []);
+  }, [navigate]);
 
   const dailyRadialData = [
     {

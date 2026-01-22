@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/api"; // 🔁 Adjust this path to where your api.js is located
 import "./ProfilePage.css";
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,6 +14,7 @@ const ProfilePage = () => {
 
     if (!token) {
       setError("Please login to view profile");
+      navigate("/", { replace: true });
       return;
     }
 
@@ -22,6 +25,12 @@ const ProfilePage = () => {
         setUser(res.data);
       } catch (err) {
         console.error("Error fetching profile", err);
+        if (err?.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/", { replace: true });
+          return;
+        }
         setError("Failed to load profile data");
       } finally {
         setLoading(false);
@@ -29,7 +38,7 @@ const ProfilePage = () => {
     };
 
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="profile-page">

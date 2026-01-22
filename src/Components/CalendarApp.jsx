@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/api"; // 🔁 Replace with actual relative path
 import "./CalendarApp.css";
 
 const CalendarApp = () => {
+  const navigate = useNavigate();
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -27,8 +29,11 @@ const CalendarApp = () => {
   useEffect(() => {
     API.get("/events")
       .then((res) => setEvents(res.data))
-      .catch((err) => console.error("Failed to fetch events", err));
-  }, []);
+      .catch((err) => {
+        if (err?.response?.status === 401) navigate("/", { replace: true });
+        console.error("Failed to fetch events", err);
+      });
+  }, [navigate]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -184,7 +189,7 @@ const CalendarApp = () => {
             {showMonthDropdown && (
               <div className="dropdown" ref={monthDropdownRef}>
                 {months.map((m, i) => (
-                  <div key={i} onClick={() => {
+                  <div className="dropdown-item" key={i} onClick={() => {
                     setCurrentMonth(i);
                     setShowMonthDropdown(false);
                   }}>{m}</div>
@@ -204,7 +209,7 @@ const CalendarApp = () => {
                 {[...Array(101)].map((_, i) => {
                   const year = currentDate.getFullYear() - 50 + i;
                   return (
-                    <div key={year} onClick={() => {
+                    <div className="dropdown-item" key={year} onClick={() => {
                       setCurrentYear(year);
                       setShowYearDropdown(false);
                     }}>{year}</div>
@@ -260,42 +265,58 @@ const CalendarApp = () => {
 
       <div className="events">
         {showEventPopup && (
-          <div className="event-popup">
-            <div className="time-input">
-              <label>Time</label>
-              <input
-                type="number"
-                name="hours"
-                min="0"
-                max="23"
-                value={eventTime.hours}
-                onChange={handleTimeChange}
+          <div className="modal-backdrop" onMouseDown={() => setShowEventPopup(false)}>
+            <div className="event-popup" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()}>
+              <h3>{editingEvent ? "Edit Event" : "New Event"}</h3>
+
+              <div className="time-input">
+                <label>Time (24h)</label>
+                <input
+                  type="number"
+                  name="hours"
+                  min="0"
+                  max="23"
+                  value={eventTime.hours}
+                  onChange={handleTimeChange}
+                />
+                <input
+                  type="number"
+                  name="minutes"
+                  min="0"
+                  max="59"
+                  value={eventTime.minutes}
+                  onChange={handleTimeChange}
+                />
+              </div>
+
+              <textarea
+                value={eventText}
+                onChange={(e) => {
+                  if (!isPastDate(selectedDate) && e.target.value.length <= 60) {
+                    setEventText(e.target.value);
+                  }
+                }}
+                placeholder="Event description (max 60 chars)"
+                maxLength={60}
               />
-              <input
-                type="number"
-                name="minutes"
-                min="0"
-                max="59"
-                value={eventTime.minutes}
-                onChange={handleTimeChange}
-              />
+
+              <div className="event-popup-actions">
+                <button className="primary" onClick={handleEventSubmit}>
+                  {editingEvent ? "Update" : "Add"}
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setShowEventPopup(false);
+                    setEditingEvent(null);
+                    setEventText("");
+                    setEventTime({ hours: "00", minutes: "00" });
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-            <textarea
-              value={eventText}
-              onChange={(e) => {
-                if (!isPastDate(selectedDate) && e.target.value.length <= 60) {
-                  setEventText(e.target.value);
-                }
-              }}
-              placeholder="Event description (max 60 chars)"
-              maxLength={60}
-            ></textarea>
-            <button onClick={handleEventSubmit}>
-              {editingEvent ? "Update" : "Add"} Event
-            </button>
-            <button onClick={() => setShowEventPopup(false)}>
-              Cancel
-            </button>
           </div>
         )}
 
