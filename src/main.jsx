@@ -7,12 +7,7 @@ import "./index.css";
 import ProfilePage from "./Components/ProfilePage";
 import ProgressPage from "./Components/ProgressPage";
 import CalendarApp from "./Components/CalendarApp";
-
-const RequireAuth = ({ children }) => {
-  const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/" replace />;
-  return children;
-};
+import RequireAuth from "./components/RequireAuth.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
