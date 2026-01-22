@@ -7,7 +7,7 @@ import "./index.css";
 import ProfilePage from "./Components/ProfilePage";
 import ProgressPage from "./Components/ProgressPage";
 import CalendarApp from "./Components/CalendarApp";
-import RequireAuth from "./components/RequireAuth.jsx";
+import RequireAuth from "./Components/RequireAuth.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
