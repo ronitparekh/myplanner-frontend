@@ -264,6 +264,20 @@ const CalendarApp = () => {
       </div>
 
       <div className="events">
+        <div className="events-header">
+          <div>
+            <h2>Upcoming Tasks</h2>
+            <p>
+              {selectedDate.toLocaleDateString(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+        </div>
+
         {showEventPopup && (
           <div className="modal-backdrop" onMouseDown={() => setShowEventPopup(false)}>
             <div className="event-popup" role="dialog" aria-modal="true" onMouseDown={(e) => e.stopPropagation()}>
